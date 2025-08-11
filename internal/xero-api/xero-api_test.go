@@ -17,11 +17,13 @@ func TestXeroApi(t *testing.T) {
 	xero := Xero{
 		Url: XeroURL,
 		Auth: Auth{
-			URL: AuthURL,
+			URL:             baseAuthURL,
+			ClientID:        os.Getenv("XERO_CLIENT_ID"),
+			ClientSecret:    os.Getenv("XERO_CLIENT_SECRET"),
+			baseCallbackURI: os.Getenv("XERO_CLIENT_CALLBACK_URI"),
 		},
-		client:   &http.Client{},
-		ClientID: os.Getenv("XERO_CLIENT_ID"),
-		port:     5678,
+		client: &http.Client{},
+		port:   5678,
 	}
 
 	if err := xero.Authorize(); err != nil {

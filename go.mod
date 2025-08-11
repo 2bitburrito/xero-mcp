@@ -1,4 +1,4 @@
-module xero-mcp
+module github.com/2bitburrito/xero-mcp
 
 go 1.24.1
 

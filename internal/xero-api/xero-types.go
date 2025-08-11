@@ -89,3 +89,26 @@ type Invoice struct {
 	AmountPaid     string `json:"AmountPaid"`
 	AmountCredited string `json:"AmountCredited"`
 }
+
+type Tokens struct {
+	AccessToken  string `json:"access_token"` // Used to call the API
+	IdToken      string `json:"id_token"`     // The token containing user identity details (only returned if OpenID Connect scopes are requested).
+	ExpiresIn    int    `json:"expires_in"`   // The amount of seconds until the access token expires.
+	TokenType    string `json:"token_type"`
+	RefreshToken string `json:"refresh_token"` // The token used to refresh the access token once it has expired (only returned if the offline_access scope is requested).
+}
+
+type accessToken struct {
+	Nbf                   int    `json:"nbf"`
+	Exp                   int    `json:"exp"`
+	Iss                   string `json:"iss"`
+	Aud                   string `json:"aud"`
+	ClientID              string `json:"client_id"`
+	Sub                   string `json:"sub"`
+	AuthTime              int    `json:"auth_time"`
+	XeroUserid            string `json:"xero_userid"`
+	GlobalSessionID       string `json:"global_session_id"`
+	Jti                   string `json:"jti"`
+	AuthenticationEventID string `json:"authentication_event_id"`
+	Scope                 string `json:"scope"`
+}

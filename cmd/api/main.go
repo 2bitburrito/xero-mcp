@@ -8,7 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	"xero-mcp/internal/server"
+
+	"github.com/2bitburrito/xero-mcp/internal/server"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {
