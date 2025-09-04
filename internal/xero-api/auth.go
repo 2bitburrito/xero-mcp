@@ -6,24 +6,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/2bitburrito/xero-mcp/internal/utils"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 const (
-	XeroURL     = "https://api.xero.com/api.xro/2.0"
-	baseAuthURL = `https://login.xero.com/identity/connect/authorize?response_type=code&client_id=%s&redirect_uri=%s:5678/callback&scope=openid offline_access openid profile email accounting.transactions&state=%s`
+	XeroURL        = "https://api.xero.com/api.xro/2.0/"
+	baseAuthURL    = `https://login.xero.com/identity/connect/authorize?response_type=code&client_id=%s&redirect_uri=%s:5678/callback&scope=openid offline_access openid profile email accounting.transactions&state=%s`
+	xeroConnectURL = "https://api.xero.com/connections"
 )
 
-type Xero struct {
-	Url    string
-	client *http.Client
-	port   int
-	Auth   Auth
-}
 type Auth struct {
 	ClientID        string
 	ClientSecret    string
@@ -72,6 +69,7 @@ func (x *Xero) Authorize() error {
 	case err := <-errChan:
 		return fmt.Errorf("error while handling auth callback: %v", err)
 	}
+	id, err := x.getTennantID()
 	return nil
 }
 
@@ -109,8 +107,6 @@ func (x *Xero) getBearerToken() error {
 	redirectURI := fmt.Sprintf("%s:%d/callback", x.Auth.baseCallbackURI, x.port)
 	formData.Set("redirect_uri", redirectURI)
 	encodedData := formData.Encode()
-	// encodedData := fmt.Sprintf("grant_type=authorization_code&code=%s&redirect_uri=%s",
-	// x.Auth.callback.code, redirectURI)
 
 	req, err := http.NewRequest("POST", tokenURL, strings.NewReader(encodedData))
 	if err != nil {
@@ -138,9 +134,35 @@ func (x *Xero) getBearerToken() error {
 	if err := json.Unmarshal(body, &x.Auth.Tokens); err != nil {
 		return err
 	}
-	// TODO: Just need to do JWT stuff here:
 	return nil
 }
 
-func (x *Xero) GetItems() {
+func (x *Xero) getTennantID() (string, error) {
+	if len(x.TennantID) != 0 {
+		return x.TennantID, nil
+	}
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
+		return hmacSampleSecret, nil
+	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		fmt.Println(claims["foo"], claims["nbf"])
+	} else {
+		fmt.Println(err)
+	}
+
+	urlWithParam := xeroConnectURL + "?authEventId=" + x.Auth.Tokens.AccessToken
+	req, err := http.NewRequest("GET", urlWithParam, nil)
+	if err != nil {
+		return "", err
+	}
+	resp, err := x.client.Do(req)
+	if err != nil {
+		return "", err
+	}
 }

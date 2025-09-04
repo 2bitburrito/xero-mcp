@@ -1,5 +1,15 @@
 package xeroapi
 
+import "net/http"
+
+type Xero struct {
+	Url       string
+	client    *http.Client
+	port      int
+	Auth      Auth
+	TennantID string
+}
+
 type Item struct {
 	ItemID              string `json:"ItemID"`
 	Code                string `json:"Code"`
@@ -45,42 +55,21 @@ type Invoice struct {
 		IsSupplier     string `json:"IsSupplier"`
 		IsCustomer     string `json:"IsCustomer"`
 	} `json:"Contact"`
-	Date            string `json:"Date"`
-	DateString      string `json:"DateString"`
-	DueDate         string `json:"DueDate"`
-	DueDateString   string `json:"DueDateString"`
-	Status          string `json:"Status"`
-	LineAmountTypes string `json:"LineAmountTypes"`
-	LineItems       []struct {
-		ItemCode    string `json:"ItemCode"`
-		Description string `json:"Description"`
-		Quantity    string `json:"Quantity"`
-		UnitAmount  string `json:"UnitAmount"`
-		TaxType     string `json:"TaxType"`
-		TaxAmount   string `json:"TaxAmount"`
-		LineAmount  string `json:"LineAmount"`
-		AccountCode string `json:"AccountCode"`
-		AccountID   string `json:"AccountId"`
-		Item        struct {
-			ItemID string `json:"ItemID"`
-			Name   string `json:"Name"`
-			Code   string `json:"Code"`
-		} `json:"Item"`
-		Tracking []struct {
-			TrackingCategoryID string `json:"TrackingCategoryID"`
-			Name               string `json:"Name"`
-			Option             string `json:"Option"`
-		} `json:"Tracking"`
-		LineItemID string `json:"LineItemID"`
-	} `json:"LineItems"`
-	SubTotal       string `json:"SubTotal"`
-	TotalTax       string `json:"TotalTax"`
-	Total          string `json:"Total"`
-	UpdatedDateUTC string `json:"UpdatedDateUTC"`
-	CurrencyCode   string `json:"CurrencyCode"`
-	InvoiceID      string `json:"InvoiceID"`
-	InvoiceNumber  string `json:"InvoiceNumber"`
-	Payments       []struct {
+	Date            string             `json:"Date"`
+	DateString      string             `json:"DateString"`
+	DueDate         string             `json:"DueDate"`
+	DueDateString   string             `json:"DueDateString"`
+	Status          string             `json:"Status"`
+	LineAmountTypes string             `json:"LineAmountTypes"`
+	LineItems       []InvoiceLineItems `json:"LineItems"`
+	SubTotal        string             `json:"SubTotal"`
+	TotalTax        string             `json:"TotalTax"`
+	Total           string             `json:"Total"`
+	UpdatedDateUTC  string             `json:"UpdatedDateUTC"`
+	CurrencyCode    string             `json:"CurrencyCode"`
+	InvoiceID       string             `json:"InvoiceID"`
+	InvoiceNumber   string             `json:"InvoiceNumber"`
+	Payments        []struct {
 		Date      string `json:"Date"`
 		Amount    string `json:"Amount"`
 		PaymentID string `json:"PaymentID"`
@@ -88,6 +77,52 @@ type Invoice struct {
 	AmountDue      string `json:"AmountDue"`
 	AmountPaid     string `json:"AmountPaid"`
 	AmountCredited string `json:"AmountCredited"`
+}
+type InvoiceLineItems struct {
+	ItemCode    string `json:"ItemCode"`
+	Description string `json:"Description"`
+	Quantity    string `json:"Quantity"`
+	UnitAmount  string `json:"UnitAmount"`
+	TaxType     string `json:"TaxType"`
+	TaxAmount   string `json:"TaxAmount"`
+	LineAmount  string `json:"LineAmount"`
+	AccountCode string `json:"AccountCode"`
+	AccountID   string `json:"AccountId"`
+	Item        struct {
+		ItemID string `json:"ItemID"`
+		Name   string `json:"Name"`
+		Code   string `json:"Code"`
+	} `json:"Item"`
+	Tracking []struct {
+		TrackingCategoryID string `json:"TrackingCategoryID"`
+		Name               string `json:"Name"`
+		Option             string `json:"Option"`
+	} `json:"Tracking"`
+	LineItemID string `json:"LineItemID"`
+}
+type Items []struct {
+	ItemID              string `json:"ItemID,omitempty"`
+	Code                string `json:"Code,omitempty"`
+	Description         string `json:"Description,omitempty"`
+	PurchaseDescription string `json:"PurchaseDescription,omitempty"`
+	UpdatedDateUTC      string `json:"UpdatedDateUTC,omitempty"`
+	PurchaseDetails     struct {
+		UnitPrice   float64 `json:"UnitPrice,omitempty"`
+		AccountCode string  `json:"AccountCode,omitempty"`
+		TaxType     string  `json:"TaxType,omitempty"`
+	} `json:"PurchaseDetails,omitempty"`
+	SalesDetails struct {
+		UnitPrice   float64 `json:"UnitPrice,omitempty"`
+		AccountCode string  `json:"AccountCode,omitempty"`
+		TaxType     string  `json:"TaxType,omitempty"`
+	} `json:"SalesDetails,omitempty"`
+	Name                      string  `json:"Name,omitempty"`
+	IsTrackedAsInventory      bool    `json:"IsTrackedAsInventory,omitempty"`
+	IsSold                    bool    `json:"IsSold,omitempty"`
+	IsPurchased               bool    `json:"IsPurchased,omitempty"`
+	InventoryAssetAccountCode string  `json:"InventoryAssetAccountCode,omitempty"`
+	TotalCostPool             float64 `json:"TotalCostPool,omitempty"`
+	QuantityOnHand            float64 `json:"QuantityOnHand,omitempty"`
 }
 
 type Tokens struct {

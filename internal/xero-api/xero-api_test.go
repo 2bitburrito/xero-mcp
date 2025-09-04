@@ -30,4 +30,11 @@ func TestXeroApi(t *testing.T) {
 		t.Fail()
 		fmt.Println(err)
 	}
+
+	items, err := xero.GetItems()
+	if err != nil {
+		t.Fail()
+		fmt.Println(err)
+	}
+	fmt.Println(items)
 }

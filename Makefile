@@ -9,7 +9,10 @@ build:
 
 # Run the application
 run:
-	@go run cmd/api/main.go
+	@echo "Building..."
+	@go build -o main cmd/api/main.go 
+	@echo "Built. Running..."
+	@./main
 
 # Test the application
 test:
