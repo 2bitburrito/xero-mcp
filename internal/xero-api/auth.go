@@ -26,7 +26,7 @@ type Auth struct {
 	redirectURL     string
 	callback        authCallback
 	baseCallbackURI string
-	Tokens          Tokens
+	Tokens          TokenResp
 	jwt             accessToken
 	Tennants        TennantResponse
 }
@@ -135,14 +135,23 @@ func (x *Xero) getBearerToken() error {
 	if err := json.Unmarshal(body, &x.Auth.Tokens); err != nil {
 		return err
 	}
+	x.decodeJWT()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (x *Xero) decodeJWT() error {
+	if len(x.Auth.Tokens.AccessToken) == 0 {
+		return fmt.Errorf("auth Token not found in xero struct")
+	}
 	jwt := strings.Split(x.Auth.Tokens.AccessToken, ".")
 	if len(jwt) < 2 {
 		return fmt.Errorf("JWT is invalid or missing")
 	}
 	payload, _ := base64.RawURLEncoding.DecodeString(jwt[1])
 	json.Unmarshal(payload, &x.Auth.jwt)
-	fmt.Printf("jwt: %+v\n", x.Auth.jwt)
-
 	return nil
 }
 
@@ -181,13 +190,15 @@ func (x *Xero) refreshJwt() error {
 	data.Set("grant_type", "refresh_token")
 	data.Set("refresh_token", x.Auth.Tokens.RefreshToken)
 
-	fmt.Println(data)
+	fmt.Println("encoded data in refreshJWT:", data.Encode())
 	req, err := http.NewRequest("POST", refreshURL, strings.NewReader(data.Encode()))
 	if err != nil {
 		return err
 	}
+	req.Header.Set("Authorization", "Basic "+base64.RawStdEncoding.EncodeToString([]byte(x.Auth.ClientID+":"+x.Auth.ClientSecret)))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	var respData map[string]string
+
+	var respData TokenResp
 	resp, err := x.client.Do(req)
 	if err != nil {
 		return err
@@ -196,6 +207,16 @@ func (x *Xero) refreshJwt() error {
 	if err != nil {
 		return err
 	}
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		fmt.Println(resp)
+		return fmt.Errorf("error in refresh_token: %+v", respData)
+	}
 	fmt.Printf("RESP in RefreshToken: %+v", respData)
+	x.Auth.Tokens = respData
+	err = x.decodeJWT()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

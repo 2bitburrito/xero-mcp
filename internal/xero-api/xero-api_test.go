@@ -27,8 +27,12 @@ func TestXeroApi(t *testing.T) {
 	}
 
 	if err := xero.Authorize(); err != nil {
-		t.Fail()
 		fmt.Println(err)
+		t.FailNow()
+	}
+	if err := xero.refreshJwt(); err != nil {
+		fmt.Println(err)
+		t.FailNow()
 	}
 
 	items, err := xero.GetItems()

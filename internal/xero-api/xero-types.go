@@ -100,7 +100,7 @@ type InvoiceLineItems struct {
 	LineItemID string `json:"LineItemID"`
 }
 
-type Tokens struct {
+type TokenResp struct {
 	AccessToken  string `json:"access_token"` // Used to call the API
 	IdToken      string `json:"id_token"`     // The token containing user identity details (only returned if OpenID Connect scopes are requested).
 	ExpiresIn    int    `json:"expires_in"`   // The amount of seconds until the access token expires.
