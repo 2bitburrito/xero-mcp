@@ -5,13 +5,18 @@ import (
 	"fmt"
 )
 
-func (x *Xero) GetItems() ([]Items, error) {
-	var items []Items
+type ItemsResponse struct {
+	Items []Item `json:"Items"`
+}
+
+func (x *Xero) GetItems() ([]Item, error) {
+	var items ItemsResponse
 	resp, err := x.makeApiCall("GET", "Items", nil)
 	if err != nil {
-		return []Items{}, err
+		return []Item{}, err
 	}
-	fmt.Println(resp)
+	fmt.Println("RESP in getItems:", resp)
 	err = json.NewDecoder(resp.Body).Decode(&items)
-	return items, err
+	fmt.Printf("ITEMS: %+v\n", items.Items)
+	return items.Items, err
 }

@@ -24,6 +24,7 @@ func (x *Xero) makeApiCall(reqType, path string, body any) (*http.Response, erro
 		return nil, fmt.Errorf("new request error for call to %s: %w", url, err)
 	}
 	req.Header.Set("Authorization", "Bearer "+x.Auth.Tokens.AccessToken)
+	req.Header.Set("Xero-tenant-id", x.Auth.Tennants.TenantID)
 	req.Header.Set("Accept", "application/json")
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")

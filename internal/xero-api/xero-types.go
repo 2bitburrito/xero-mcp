@@ -3,11 +3,10 @@ package xeroapi
 import "net/http"
 
 type Xero struct {
-	Url       string
-	client    *http.Client
-	port      int
-	Auth      Auth
-	TennantID string
+	Url    string
+	client *http.Client
+	port   int
+	Auth   Auth
 }
 
 type Item struct {
@@ -100,30 +99,6 @@ type InvoiceLineItems struct {
 	} `json:"Tracking"`
 	LineItemID string `json:"LineItemID"`
 }
-type Items []struct {
-	ItemID              string `json:"ItemID,omitempty"`
-	Code                string `json:"Code,omitempty"`
-	Description         string `json:"Description,omitempty"`
-	PurchaseDescription string `json:"PurchaseDescription,omitempty"`
-	UpdatedDateUTC      string `json:"UpdatedDateUTC,omitempty"`
-	PurchaseDetails     struct {
-		UnitPrice   float64 `json:"UnitPrice,omitempty"`
-		AccountCode string  `json:"AccountCode,omitempty"`
-		TaxType     string  `json:"TaxType,omitempty"`
-	} `json:"PurchaseDetails,omitempty"`
-	SalesDetails struct {
-		UnitPrice   float64 `json:"UnitPrice,omitempty"`
-		AccountCode string  `json:"AccountCode,omitempty"`
-		TaxType     string  `json:"TaxType,omitempty"`
-	} `json:"SalesDetails,omitempty"`
-	Name                      string  `json:"Name,omitempty"`
-	IsTrackedAsInventory      bool    `json:"IsTrackedAsInventory,omitempty"`
-	IsSold                    bool    `json:"IsSold,omitempty"`
-	IsPurchased               bool    `json:"IsPurchased,omitempty"`
-	InventoryAssetAccountCode string  `json:"InventoryAssetAccountCode,omitempty"`
-	TotalCostPool             float64 `json:"TotalCostPool,omitempty"`
-	QuantityOnHand            float64 `json:"QuantityOnHand,omitempty"`
-}
 
 type Tokens struct {
 	AccessToken  string `json:"access_token"` // Used to call the API
@@ -146,4 +121,14 @@ type accessToken struct {
 	Jti                   string `json:"jti"`
 	AuthenticationEventID string `json:"authentication_event_id"`
 	Scope                 string `json:"scope"`
+}
+
+type TennantResponse struct {
+	ID             string `json:"id"`
+	AuthEventID    string `json:"authEventId"`
+	TenantID       string `json:"tenantId"`
+	TenantType     string `json:"tenantType"`
+	TenantName     string `json:"tenantName"`
+	CreatedDateUtc string `json:"createdDateUtc"`
+	UpdatedDateUtc string `json:"updatedDateUtc"`
 }

@@ -29,3 +29,5 @@ main
 # OS X generated file
 .DS_Store
 
+# Xero's example repo
+xero-example/

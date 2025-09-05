@@ -6,19 +6,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/2bitburrito/xero-mcp/internal/utils"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 const (
-	XeroURL        = "https://api.xero.com/api.xro/2.0/"
-	baseAuthURL    = `https://login.xero.com/identity/connect/authorize?response_type=code&client_id=%s&redirect_uri=%s:5678/callback&scope=openid offline_access openid profile email accounting.transactions&state=%s`
-	xeroConnectURL = "https://api.xero.com/connections"
+	XeroURL     = "https://api.xero.com/api.xro/2.0/"
+	baseAuthURL = `https://login.xero.com/identity/connect/authorize?response_type=code&client_id=%s&redirect_uri=%s:5678/callback&scope=openid offline_access openid profile email accounting.transactions accounting.settings&state=%s`
 )
 
 type Auth struct {
@@ -31,6 +28,7 @@ type Auth struct {
 	baseCallbackURI string
 	Tokens          Tokens
 	jwt             accessToken
+	Tennants        TennantResponse
 }
 
 type authCallback struct {
@@ -69,7 +67,10 @@ func (x *Xero) Authorize() error {
 	case err := <-errChan:
 		return fmt.Errorf("error while handling auth callback: %v", err)
 	}
-	id, err := x.getTennantID()
+	err := x.getTennantID()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -134,35 +135,67 @@ func (x *Xero) getBearerToken() error {
 	if err := json.Unmarshal(body, &x.Auth.Tokens); err != nil {
 		return err
 	}
+	jwt := strings.Split(x.Auth.Tokens.AccessToken, ".")
+	if len(jwt) < 2 {
+		return fmt.Errorf("JWT is invalid or missing")
+	}
+	payload, _ := base64.RawURLEncoding.DecodeString(jwt[1])
+	json.Unmarshal(payload, &x.Auth.jwt)
+	fmt.Printf("jwt: %+v\n", x.Auth.jwt)
+
 	return nil
 }
 
-func (x *Xero) getTennantID() (string, error) {
-	if len(x.TennantID) != 0 {
-		return x.TennantID, nil
-	}
+func (x *Xero) getTennantID() error {
+	xeroConnectURL := "https://api.xero.com/connections"
 
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
-		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
-		return hmacSampleSecret, nil
-	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
+	if len(x.Auth.Tennants.TenantID) != 0 {
+		return nil
+	}
+	req, err := http.NewRequest("GET", xeroConnectURL, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	req.Header.Set("Authorization", "Bearer "+x.Auth.Tokens.AccessToken)
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-		fmt.Println(claims["foo"], claims["nbf"])
-	} else {
-		fmt.Println(err)
-	}
-
-	urlWithParam := xeroConnectURL + "?authEventId=" + x.Auth.Tokens.AccessToken
-	req, err := http.NewRequest("GET", urlWithParam, nil)
-	if err != nil {
-		return "", err
-	}
 	resp, err := x.client.Do(req)
 	if err != nil {
-		return "", err
+		return err
 	}
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return fmt.Errorf("responded with Error Code: %d", resp.StatusCode)
+	}
+	var tennant []TennantResponse
+	err = json.NewDecoder(resp.Body).Decode(&tennant)
+	if err != nil {
+		return err
+	}
+	x.Auth.Tennants = tennant[0]
+	return nil
+}
+
+func (x *Xero) refreshJwt() error {
+	refreshURL := "https://identity.xero.com/connect/token"
+
+	data := url.Values{}
+	data.Set("grant_type", "refresh_token")
+	data.Set("refresh_token", x.Auth.Tokens.RefreshToken)
+
+	fmt.Println(data)
+	req, err := http.NewRequest("POST", refreshURL, strings.NewReader(data.Encode()))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	var respData map[string]string
+	resp, err := x.client.Do(req)
+	if err != nil {
+		return err
+	}
+	err = json.NewDecoder(resp.Body).Decode(&respData)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("RESP in RefreshToken: %+v", respData)
+	return nil
 }
