@@ -123,6 +123,32 @@ type accessToken struct {
 	Scope                 string `json:"scope"`
 }
 
+type Contact struct {
+	ContactID     string `json:"ContactID"`
+	ContactStatus string `json:"ContactStatus"`
+	Name          string `json:"Name"`
+	FirstName     string `json:"FirstName,omitempty"`
+	LastName      string `json:"LastName,omitempty"`
+	EmailAddress  string `json:"EmailAddress,omitempty"`
+	Addresses     []struct {
+		AddressType  string `json:"AddressType"`
+		AddressLine1 string `json:"AddressLine1,omitempty"`
+		AddressLine2 string `json:"AddressLine2,omitempty"`
+		City         string `json:"City,omitempty"`
+		PostalCode   string `json:"PostalCode,omitempty"`
+		Country      string `json:"Country,omitempty"`
+	} `json:"Addresses"`
+	Phones []struct {
+		PhoneType        string `json:"PhoneType"`
+		PhoneNumber      string `json:"PhoneNumber,omitempty"`
+		PhoneAreaCode    string `json:"PhoneAreaCode,omitempty"`
+		PhoneCountryCode string `json:"PhoneCountryCode,omitempty"`
+	} `json:"Phones"`
+	UpdatedDateUTC string `json:"UpdatedDateUTC"`
+	IsSupplier     bool   `json:"IsSupplier"`
+	IsCustomer     bool   `json:"IsCustomer"`
+}
+
 type TennantResponse struct {
 	ID             string `json:"id"`
 	AuthEventID    string `json:"authEventId"`

@@ -2,7 +2,6 @@ package xeroapi
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
 type ItemsResponse struct {
@@ -15,8 +14,6 @@ func (x *Xero) GetItems() ([]Item, error) {
 	if err != nil {
 		return []Item{}, err
 	}
-	fmt.Println("RESP in getItems:", resp)
 	err = json.NewDecoder(resp.Body).Decode(&items)
-	fmt.Printf("ITEMS: %+v\n", items.Items)
 	return items.Items, err
 }
