@@ -1,17 +1,48 @@
 package mcpServer
 
 import (
+	"context"
+
 	xeroapi "github.com/2bitburrito/xero-mcp/internal/xero-api"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-func NewServer(x xeroapi.Xero) *mcp.Server {
+type XeroToolHandler struct {
+	context    context.Context
+	xeroClient *xeroapi.Xero
+}
+
+func NewServer(ctx context.Context, x xeroapi.Xero) *mcp.Server {
+	xh := &XeroToolHandler{
+		context:    ctx,
+		xeroClient: &x,
+	}
 	opts := mcp.ServerOptions{}
 	server := mcp.NewServer(&mcp.Implementation{Name: "xero-mcp", Version: "v0.1.0"}, &opts)
 
-	mcp.AddTool(server, &mcp.Tool{Name: "list-items", Description: "This will list all available pre-made items"}, listItems(x))
-	mcp.AddTool(server, &mcp.Tool{Name: "list-invoices", Description: "This will list all available pre-made items"}, listAllInvoices(x))
-	mcp.AddTool(server, &mcp.Tool{Name: "create-invoice", Description: "This will list all available pre-made items"}, getItems)
-	// Run the server over stdin/stdout, until the client disconnects
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "list-items",
+		Description: "This will list all available items",
+	},
+		xh.listItems)
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "list-invoices",
+		Description: "Returns a list of all invoices",
+	},
+		xh.listAllInvoices)
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "get-contacts",
+		Description: "Lists all available contacts from xero",
+	},
+		xh.getContacts)
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "create-invoice",
+		Description: "This will list all available pre-made items",
+	},
+		xh.createInvoice)
+
 	return server
 }

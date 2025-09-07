@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 
@@ -10,16 +11,21 @@ import (
 )
 
 func main() {
-	url := "http://localhost:9876"
+	url := "localhost:8090"
 	x := xeroapi.Xero{}
+	err := x.Authorize()
+	if err != nil {
+		log.Fatalf("Couldn't Authorize Xero: %v", err)
+	}
+	ctx := context.Background()
 
 	handler := mcp.NewStreamableHTTPHandler(func(req *http.Request) *mcp.Server {
-		server := mcpServer.NewServer(x)
+		server := mcpServer.NewServer(ctx, x)
 		return server
 	}, nil)
 
-	log.Printf("MCP server listening on %s", url)
-	// Start the HTTP server with logging handler.
+	log.Printf("MCP server listening on %s...", url)
+
 	if err := http.ListenAndServe(url, handler); err != nil {
 		log.Fatalf("Server failed: %v", err)
 	}
