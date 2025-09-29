@@ -42,7 +42,7 @@ func (h *XeroToolHandler) listAllInvoices(ctx context.Context, req *mcp.CallTool
 func (h *XeroToolHandler) createInvoice(ctx context.Context, req *mcp.CallToolRequest, _ *ListInvoicesParams) (*mcp.CallToolResult, []xeroapi.Invoice, error) {
 	invoices, err := h.xeroClient.GetInvoices()
 	if err != nil {
-		return nil, []xeroapi.Invoice{}, fmt.Errorf("failed to get invoices: %w", err)
+		return nil, []xeroapi.Invoice{}, fmt.Errorf("failed to create invoice: %w", err)
 	}
 	return nil, invoices, nil
 }
