@@ -60,10 +60,10 @@ func (h *XeroToolHandler) listAllInvoices(ctx context.Context, req *mcp.CallTool
 	return nil, m, nil
 }
 
-// func (h *XeroToolHandler) createInvoice(ctx context.Context, req *mcp.CallToolRequest, _ *ListInvoicesParams) (*mcp.CallToolResult, xeroapi.Invoice, error) {
-// 	invoices, err := h.XeroClient.GetInvoices()
-// 	if err != nil {
-// 		return nil, xeroapi.Invoice{}, fmt.Errorf("failed to create invoice: %w", err)
-// 	}
-// 	return nil, invoices, nil
-// }
+func (h *XeroToolHandler) createInvoice(ctx context.Context, req *mcp.CallToolRequest, params *xeroapi.CreateInvoiceRequest) (*mcp.CallToolResult, xeroapi.Invoice, error) {
+	invoices, err := h.XeroClient.CreateInvoice(*params)
+	if err != nil {
+		return nil, xeroapi.Invoice{}, fmt.Errorf("failed to create invoice: %w", err)
+	}
+	return nil, invoices, nil
+}

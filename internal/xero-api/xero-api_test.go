@@ -28,6 +28,7 @@ func TestXeroApi(t *testing.T) {
 		Client: &http.Client{},
 	}
 
+	// Authenticate:
 	authURL := xero.GetAuthURL()
 	if len(authURL) == 0 {
 		fmt.Println("returned url of len 0")
@@ -67,10 +68,27 @@ func TestXeroApi(t *testing.T) {
 		t.FailNow()
 	}
 
+	// List Items:
 	items, err := xero.GetItems()
 	if err != nil {
 		t.Fail()
 		fmt.Println(err)
 	}
-	fmt.Println(items)
+	// fmt.Println(items)
+
+	// List Contacts:
+	contacts, err := xero.GetContacts()
+	if err != nil {
+		t.Fail()
+		fmt.Println(err)
+	}
+	// fmt.Println(contacts)
+
+	// Get Invoices
+	invoices, err := xero.GetInvoices()
+	if err != nil {
+		t.Fail()
+		fmt.Println(err)
+	}
+	fmt.Println(invoices)
 }

@@ -9,8 +9,41 @@ type InvoicesResponse struct {
 	Invoices []Invoice `json:"Invoices"`
 }
 
+//	{
+//	  "Type": "ACCREC",
+//	  "Contact": {
+//	    "ContactID": "eaa28f49-6028-4b6e-bb12-d8f6278073fc"
+//	  },
+//	  "Date": "\/Date(1518685950940+0000)\/",
+//	  "DateString": "2009-05-27T00:00:00",
+//	  "DueDate": "\/Date(1518685950940+0000)\/",
+//	  "DueDateString": "2009-06-06T00:00:00",
+//	  "LineAmountTypes": "Exclusive",
+//	  "LineItems": [
+//	    {
+//	      "Description": "Consulting services as agreed (20% off standard rate)",
+//	      "Quantity": "10",
+//	      "UnitAmount": "100.00",
+//	      "AccountCode": "200",
+//	      "DiscountRate": "20"
+//	    }
+//	  ]
+//	}
 type CreateInvoiceRequest struct {
-	Invoices []Invoice `json:"Invoices"`
+	Type    string `json:"Type"`
+	Contact struct {
+		ContactID string `json:"ContactID"`
+	} `json:"Contact"`
+	DueDate         string         `json:"DueDate"`
+	LineAmountTypes string         `json:"LineAmountTypes"`
+	LineItems       []InvoiceItems `json:"LineItems"`
+}
+type InvoiceItems struct {
+	Description  string `json:"Description"`
+	LineItemID   string `json:"LineItemID,omitempty"`
+	Quantity     int    `json:"Quantity"`
+	UnitAmount   int    `json:"UnitAmount"`
+	DiscountRate string `json:"DiscountRate"`
 }
 
 type EmailInvoiceRequest struct {
@@ -54,12 +87,36 @@ func (x *Xero) GetInvoice(invoiceID string) (*Invoice, error) {
 	return &invoices.Invoices[0], nil
 }
 
-func (x *Xero) CreateInvoice(invoice Invoice) (*Invoice, error) {
-	requestBody := CreateInvoiceRequest{
-		Invoices: []Invoice{invoice},
+type CreateInvoiceParams struct {
+	ContactID string
+	Items     []struct {
+		Quantity    int
+		LineItemID  string
+		ItemCode    string
+		Description string
 	}
+}
 
-	resp, err := x.makeAPICall("POST", "Invoices", requestBody)
+func (x *Xero) CreateInvoice(params CreateInvoiceParams) (*Invoice, error) {
+	inv := CreateInvoiceRequest{
+		Type:    "ACCREC",
+		DueDate: Date.AddDate(0, 0, 30).Format("2006-01-02"),
+		Contact: struct {
+			ContactID string `json:"ContactID"`
+		}{
+			ContactID: params.ContactID,
+		},
+		LineAmountTypes: "Exclusive",
+	}
+	for _, item := range params.Items {
+		newItem := InvoiceItems{
+			Quantity:    item.Quantity,
+			LineItemID:  item.LineItemID,
+			Description: item.Description,
+		}
+		inv.LineItems = append(inv.LineItems, newItem)
+	}
+	resp, err := x.makeAPICall("POST", "Invoices", inv)
 	if err != nil {
 		return nil, err
 	}
@@ -79,8 +136,10 @@ func (x *Xero) CreateInvoice(invoice Invoice) (*Invoice, error) {
 }
 
 func (x *Xero) UpdateInvoice(invoiceID string, invoice Invoice) (*Invoice, error) {
+	// TODO: Fill in the fields to update
+
 	requestBody := CreateInvoiceRequest{
-		Invoices: []Invoice{invoice},
+		// Invoices: []Invoice{invoice},
 	}
 
 	path := fmt.Sprintf("Invoices/%s", invoiceID)

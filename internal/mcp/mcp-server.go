@@ -43,11 +43,11 @@ func NewServer(xh *XeroToolHandler) *mcp.Server {
 	},
 		xh.getContacts)
 
-	// mcp.AddTool(server, &mcp.Tool{
-	// 	Name:        "create-invoice",
-	// 	Description: "This will list all available pre-made items",
-	// },
-	// 	xh.createInvoice)
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "create-invoice",
+		Description: "This will list all available pre-made items",
+	},
+		xh.createInvoice)
 
 	return server
 }

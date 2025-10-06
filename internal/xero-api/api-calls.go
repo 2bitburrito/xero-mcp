@@ -11,7 +11,7 @@ import (
 
 func (x *Xero) makeAPICall(reqType, path string, body any) (*http.Response, error) {
 	url := XeroURL + path
-	fmt.Println("making api call to : ", url)
+	fmt.Println("making api call to: ", url)
 	var reqbody io.Reader
 	if body != nil {
 		buf := new(bytes.Buffer)
@@ -23,7 +23,9 @@ func (x *Xero) makeAPICall(reqType, path string, body any) (*http.Response, erro
 	}
 	req, err := http.NewRequest(reqType, url, reqbody)
 	if err != nil {
-		return nil, fmt.Errorf("new request error for call to %s: %w", url, err)
+		err = fmt.Errorf("new request error for call to %s: %w", url, err)
+		log.Println(err)
+		return nil, err
 	}
 	req.Header.Set("Authorization", "Bearer "+x.Auth.Tokens.AccessToken)
 	req.Header.Set("Xero-tenant-id", x.Auth.Tennants.TenantID)
@@ -42,7 +44,9 @@ func (x *Xero) makeAPICall(reqType, path string, body any) (*http.Response, erro
 		err := json.NewDecoder(resp.Body).Decode(&errResp)
 		defer resp.Body.Close()
 		if err != nil {
-			return nil, fmt.Errorf("error in request call to: %s\nCouldn't decode to json", url)
+			err = fmt.Errorf("error in request call to: %s\nCouldn't decode to json, : %w", url, err)
+			log.Println(err)
+			return nil, err
 		}
 
 		return nil, fmt.Errorf("error in request call to: %s\nResponded with: %+v", url, errResp)

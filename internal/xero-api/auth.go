@@ -14,7 +14,7 @@ import (
 
 const (
 	XeroURL     = "https://api.xero.com/api.xro/2.0/"
-	BaseAuthURL = `https://login.xero.com/identity/connect/authorize?response_type=code&client_id=%s&redirect_uri=%s:%v/callback&scope=openid offline_access openid profile email accounting.transactions accounting.settings&state=%s`
+	BaseAuthURL = `https://login.xero.com/identity/connect/authorize?response_type=code&client_id=%s&redirect_uri=%s:%v/callback&scope=openid offline_access openid profile email accounting.transactions accounting.contacts accounting.settings&state=%s`
 )
 
 type Auth struct {
