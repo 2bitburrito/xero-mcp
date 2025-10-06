@@ -1,4 +1,5 @@
-package mcpServer
+// Package mcpserver is a package that provides the Model Context Protocol (MCP) server
+package mcpserver
 
 import (
 	"context"
@@ -8,17 +9,21 @@ import (
 )
 
 type XeroToolHandler struct {
-	context    context.Context
-	xeroClient *xeroapi.Xero
+	Context    context.Context
+	XeroClient *xeroapi.Xero
 }
 
-func NewServer(ctx context.Context, x xeroapi.Xero) *mcp.Server {
-	xh := &XeroToolHandler{
-		context:    ctx,
-		xeroClient: &x,
+func NewServer(xh *XeroToolHandler) *mcp.Server {
+	opts := mcp.ServerOptions{
+		Instructions: "Ensure that you have run 'authenticate' before calling any other tools",
 	}
-	opts := mcp.ServerOptions{}
 	server := mcp.NewServer(&mcp.Implementation{Name: "xero-mcp", Version: "v0.1.0"}, &opts)
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "authenticate",
+		Description: "This will return a url the user must click through to authenticate",
+	},
+		xh.getAuthURL)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list-items",
@@ -38,11 +43,11 @@ func NewServer(ctx context.Context, x xeroapi.Xero) *mcp.Server {
 	},
 		xh.getContacts)
 
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "create-invoice",
-		Description: "This will list all available pre-made items",
-	},
-		xh.createInvoice)
+	// mcp.AddTool(server, &mcp.Tool{
+	// 	Name:        "create-invoice",
+	// 	Description: "This will list all available pre-made items",
+	// },
+	// 	xh.createInvoice)
 
 	return server
 }

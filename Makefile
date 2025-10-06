@@ -19,6 +19,11 @@ test:
 	@echo "Testing..."
 	@go test ./... -v
 
+# Test the application
+test-full:
+	@echo "Testing..."
+	@go test ./... -v -tags=integration
+
 # Clean the binary
 clean:
 	@echo "Cleaning..."

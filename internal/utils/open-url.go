@@ -6,6 +6,8 @@ import (
 	"runtime"
 )
 
+// OpenURL opens the specified URL in the default web browser of the user
+// using OS-specific commands.
 func OpenURL(url string) error {
 	fmt.Println("Visiting this URL to authorize: ", url)
 	var cmd string

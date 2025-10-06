@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 )
 
-func (x *Xero) makeApiCall(reqType, path string, body any) (*http.Response, error) {
+func (x *Xero) makeAPICall(reqType, path string, body any) (*http.Response, error) {
 	url := XeroURL + path
+	fmt.Println("making api call to : ", url)
 	var reqbody io.Reader
 	if body != nil {
 		buf := new(bytes.Buffer)
@@ -29,9 +31,11 @@ func (x *Xero) makeApiCall(reqType, path string, body any) (*http.Response, erro
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}
-	resp, err := x.client.Do(req)
+	resp, err := x.Client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("new request error for call to %s: %w", url, err)
+		err = fmt.Errorf("new request error for call to %s: %w", url, err)
+		log.Println(err)
+		return nil, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		var errResp map[string]any

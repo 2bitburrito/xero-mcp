@@ -10,7 +10,7 @@ type ItemsResponse struct {
 
 func (x *Xero) GetItems() ([]Item, error) {
 	var items ItemsResponse
-	resp, err := x.makeApiCall("GET", "Items", nil)
+	resp, err := x.makeAPICall("GET", "Items", nil)
 	if err != nil {
 		return []Item{}, err
 	}

@@ -11,7 +11,7 @@ type ContactsResponse struct {
 
 func (x *Xero) GetContacts() ([]Contact, error) {
 	var contacts ContactsResponse
-	resp, err := x.makeApiCall("GET", "Contacts", nil)
+	resp, err := x.makeAPICall("GET", "Contacts", nil)
 	if err != nil {
 		return []Contact{}, err
 	}
@@ -28,7 +28,7 @@ func (x *Xero) GetContacts() ([]Contact, error) {
 func (x *Xero) GetContact(contactID string) (*Contact, error) {
 	var contacts ContactsResponse
 	path := fmt.Sprintf("Contacts/%s", contactID)
-	resp, err := x.makeApiCall("GET", path, nil)
+	resp, err := x.makeAPICall("GET", path, nil)
 	if err != nil {
 		return nil, err
 	}

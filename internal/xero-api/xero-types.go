@@ -3,10 +3,10 @@ package xeroapi
 import "net/http"
 
 type Xero struct {
-	Url    string
-	client *http.Client
-	port   int
+	Client *http.Client
 	Auth   Auth
+	Url    string
+	Port   int
 }
 
 type Item struct {

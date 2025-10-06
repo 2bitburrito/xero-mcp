@@ -1,32 +1,29 @@
 package main
 
 import (
-	"context"
+	"fmt"
 	"log"
 	"net/http"
 
-	mcpServer "github.com/2bitburrito/xero-mcp/internal/mcp"
-	xeroapi "github.com/2bitburrito/xero-mcp/internal/xero-api"
-	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/2bitburrito/xero-mcp/internal/server"
+	"github.com/2bitburrito/xero-mcp/internal/setup"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	url := "localhost:8090"
-	x := xeroapi.Xero{}
-	err := x.Authorize()
+	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatalf("Couldn't Authorize Xero: %v", err)
+		log.Fatal("Error loading .env file")
 	}
-	ctx := context.Background()
 
-	handler := mcp.NewStreamableHTTPHandler(func(req *http.Request) *mcp.Server {
-		server := mcpServer.NewServer(ctx, x)
-		return server
-	}, nil)
+	dependencies, err := setup.Dependencies()
+	if err != nil {
+		log.Fatal("error setting up dependencies: ", err)
+	}
+	server := server.NewServer(dependencies)
 
-	log.Printf("MCP server listening on %s...", url)
-
-	if err := http.ListenAndServe(url, handler); err != nil {
-		log.Fatalf("Server failed: %v", err)
+	err = server.ListenAndServe()
+	if err != nil && err != http.ErrServerClosed {
+		panic(fmt.Sprintf("http server error: %s", err))
 	}
 }
